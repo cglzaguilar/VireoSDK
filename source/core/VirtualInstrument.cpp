@@ -442,6 +442,74 @@ TypeRef ClumpParseState::ReresolveInstruction(SubString* opName)
 
     return _instructionType;
 }
+
+#define VIREO_DEBUG_PARSING_PRINT_OVERLOADS 0  // Turn on to print overloads to console as VIA instructions are parsed
+#ifdef VIREO_DEBUG_PARSING_PRINT_OVERLOADS
+//------------------------------------------------------------
+static void PrintOverload(ConstCStr outputPrefix, NamedTypeRef overload, TypeRef baseVIType, Boolean isCalculatePass)
+{
+    if (isCalculatePass)
+        return;
+
+    gPlatform.IO.Printf("%s", outputPrefix);
+    if (overload->BitEncoding() == kEncoding_Pointer) {
+        TypeRef parameters = nullptr;
+        // Native instruction
+        if (overload->PointerType() == kPTGenericFunctionCodeGen) {
+            TypeRef instructionType = overload->GetSubElement(0);
+            parameters = instructionType;
+            gPlatform.IO.Printf("%.*s (", FMT_LEN_BEGIN(&instructionType->Name()));
+        } else {
+            InstructionFunction  instructionfunction;
+            overload->InitData(&instructionfunction);
+            SubString cName;
+            THREAD_TADM()->FindCustomPointerTypeFromValue(static_cast<void*>(instructionfunction), &cName);
+            gPlatform.IO.Printf("%.*s (", FMT_LEN_BEGIN(&cName));
+            parameters = overload->GetSubElement(0);
+        }
+        // Print parameter type
+        if (parameters) {
+            Int32 parametersCount = parameters->SubElementCount();
+            for (int i = 0; i < parametersCount; i++) {
+                TypeRef parameterType = parameters->GetSubElement(i);
+                gPlatform.IO.Printf("%.*s", FMT_LEN_BEGIN(&parameterType->Name()));
+                if (i != parametersCount - 1) {
+                    gPlatform.IO.Printf(", ");
+                }
+            }
+        }
+        gPlatform.IO.Printf(")");
+
+    } else if (overload->IsA(baseVIType)) {
+        gPlatform.IO.Printf("%.*s - SubVI Call", FMT_LEN_BEGIN(&overload->Name()));
+    } else if (overload->IsString()) {
+        StringRef *str = static_cast<StringRef*>(overload->Begin(kPARead));
+        if (str) {
+            SubString subString = (*str)->MakeSubStringAlias();
+            gPlatform.IO.Printf("String: %.*s : ", FMT_LEN_BEGIN(&subString));
+        }
+    }
+
+    if (overload->PointerType() == kPTGenericFunctionCodeGen) {
+        gPlatform.IO.Printf("\n\t\tGeneric loader");
+    }
+    gPlatform.IO.Printf("\n");
+}
+//------------------------------------------------------------
+static void PrintOverloads(SubString* opName, TypeManagerRef typeManagerRef, TypeRef baseVIType, Boolean isCalculatePass)
+{
+    if (isCalculatePass)
+        return;
+
+    NamedTypeRef originalFunctionDefinition = typeManagerRef->FindTypeCore(opName, true);
+    gPlatform.IO.Printf("=========================================================\n");
+    gPlatform.IO.Printf("'%.*s' has the following overloads:\n", FMT_LEN_BEGIN(opName));
+    for (NamedTypeRef overload = originalFunctionDefinition; overload; overload = overload->NextOverload()) {
+        PrintOverload("\t", overload, baseVIType, isCalculatePass);
+    }
+    gPlatform.IO.Printf("=========================================================\n");
+}
+#endif  // VIREO_DEBUG_PARSING_PRINT_OVERLOADS
 //------------------------------------------------------------
 TypeRef ClumpParseState::StartNextOverload()
 {
@@ -491,6 +559,9 @@ TypeRef ClumpParseState::StartNextOverload()
             t = _clump->TheTypeManager()->FindTypeCore(&ss);
         }
     }
+#ifdef VIREO_DEBUG_PARSING_PRINT_OVERLOADS
+    PrintOverload("\ttrying... ", t, _baseViType, _cia->IsCalculatePass());
+#endif
     return _instructionType;
 }
 //------------------------------------------------------------
@@ -507,6 +578,9 @@ TypeRef ClumpParseState::StartInstruction(SubString* opName)
         }
     }
     _hasMultipleDefinitions = _nextFunctionDefinition ? _nextFunctionDefinition->NextOverload() != nullptr : false;
+#ifdef VIREO_DEBUG_PARSING_PRINT_OVERLOADS
+    PrintOverloads(opName, _clump->TheTypeManager(), _baseViType, _cia->IsCalculatePass());
+#endif
     return StartNextOverload();
 }
 //------------------------------------------------------------
