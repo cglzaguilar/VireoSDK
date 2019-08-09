@@ -79,6 +79,7 @@ struct ViaFormatOptions
     Int32           _fieldWidth;
     Int32           _precision;
     ViaFormatChars  _fmt;
+    Boolean         _useUppercaseForBooleans;
 };
 
 //------------------------------------------------------------
@@ -188,6 +189,7 @@ class TDViaFormatter
     void    SetFieldWidth(Int32 width) { _options._fieldWidth = width; }
     void    SetPrecision(Int32 precision) { _options._precision = precision; }
     void    SetExponentialNotation(Boolean on) { _options._exponentialNotation = on; }
+    void    SetUseUppercaseForBooleans(Boolean useUppercaseForBooleans) { _options._useUppercaseForBooleans = useUppercaseForBooleans; }
     // Data formatters
     void    FormatData(TypeRef type, void* pData);
     void    FormatArrayData(TypeRef arrayType, TypedArrayCoreRef pArray, Int32 rank);
@@ -215,7 +217,7 @@ class TDViaFormatter
     }
 };
 
-void Format(SubString *format, Int32 count, StaticTypeAndData arguments[], StringRef buffer, ErrorCluster *errPtr);
+void Format(Boolean useUppercaseForBooleans, SubString *format, Int32 count, StaticTypeAndData arguments[], StringRef buffer, ErrorCluster *errPtr);
 #endif
 
 #define tsBoolean         "Boolean"

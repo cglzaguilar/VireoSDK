@@ -223,38 +223,41 @@ void DefaultFormatCode(Int32 count, StaticTypeAndData arguments[], TempStackCStr
             return;
         }
         switch (argType->BitEncoding()) {
-        case kEncoding_UInt: {
-            buffer->AppendCStr("%u");
-        }
-        break;
+            case kEncoding_UInt: {
+                buffer->AppendCStr("%u");
+            }
+            break;
             case kEncoding_Enum: {
                 buffer->AppendCStr("%s");
-        }
-        break;
-        case kEncoding_S2CInt:
-        case kEncoding_DimInt: {
-            buffer->AppendCStr("%d");
-        }
-        break;
-        case kEncoding_IEEE754Binary: {
-            buffer->AppendCStr("%f");
-        }
-        break;
-        case kEncoding_Array: {
-            TypedArrayCoreRef* pArray = (TypedArrayCoreRef*)(arguments[i]._pData);
-            TypeRef elementType = (*pArray)->ElementType();
-            EncodingEnum elementEncoding = elementType->BitEncoding();
-            if (argType->Rank() == 1 && (elementEncoding == kEncoding_Ascii || elementEncoding == kEncoding_Unicode)) {
-                buffer->AppendCStr("%s");
-            } else {
-                // doesn't support yet
-                buffer->AppendCStr("%Z");
             }
-        }
-        break;
-        default:
-            buffer->AppendCStr("%Z");
-        break;
+            break;
+            case kEncoding_S2CInt:
+            case kEncoding_DimInt: {
+                buffer->AppendCStr("%d");
+            }
+            break;
+            case kEncoding_IEEE754Binary: {
+                buffer->AppendCStr("%f");
+            }
+            break;
+            case kEncoding_Array: {
+                TypedArrayCoreRef* pArray = (TypedArrayCoreRef*)(arguments[i]._pData);
+                TypeRef elementType = (*pArray)->ElementType();
+                EncodingEnum elementEncoding = elementType->BitEncoding();
+                if (argType->Rank() == 1 && (elementEncoding == kEncoding_Ascii || elementEncoding == kEncoding_Unicode)) {
+                    buffer->AppendCStr("%s");
+                } else {
+                    // doesn't support yet
+                    buffer->AppendCStr("%Z");
+                }
+            }
+            case kEncoding_Boolean: {
+                buffer->AppendCStr("%s");
+            }
+            break;
+            default:
+                buffer->AppendCStr("%Z");
+            break;
         }
     }
 }
@@ -418,7 +421,7 @@ static Int32 GetTimeZoneOffsetFromTimeAndLocale(StaticTypeAndData *arg, const Fo
 /**
  * main format function, all the %format functionality is done through this one
  * */
-void Format(SubString *format, Int32 count, StaticTypeAndData arguments[], StringRef buffer, ErrorCluster *errPtr)
+void Format(Boolean useUppercaseForBooleans, SubString *format, Int32 count, StaticTypeAndData arguments[], StringRef buffer, ErrorCluster *errPtr)
 {
     IntIndex argumentIndex = 0;
     Boolean lastArgumentSpecified = false;
@@ -432,6 +435,7 @@ void Format(SubString *format, Int32 count, StaticTypeAndData arguments[], Strin
     Boolean validFormatString = true;
     Utf8Char c = 0;
     FormatOptions fOptions;
+    
     // We should assign the local decimal point to DecimalSeparator.
     char defaultDecimalSeparator = '.';
     fOptions.DecimalSeparator = defaultDecimalSeparator;
@@ -799,6 +803,7 @@ void Format(SubString *format, Int32 count, StaticTypeAndData arguments[], Strin
                         }
                         STACK_VAR(String, tempString);
                         TDViaFormatter formatter(tempString.Value, false);
+                        formatter.SetUseUppercaseForBooleans(useUppercaseForBooleans);
                         formatter.FormatData(arguments[argumentIndex]._paramType, arguments[argumentIndex]._pData);
 
                         Int32 lengthTotal = -1;
@@ -1907,7 +1912,7 @@ void defaultFormatValue(StringRef output,  StringRef formatString, StaticTypeAnd
         }
     }
     format.AliasAssign(tempformat.Begin(), tempformat.End());
-    Format(&format, 1, &Value, output, nullptr);
+    Format(false, &format, 1, &Value, output, nullptr);
     output->AppendSubString(&remainingFormat);
 }
 
@@ -1947,7 +1952,7 @@ VIREO_FUNCTION_SIGNATUREV(StringFormat, StringFormatParamBlock) {
     StringRef buffer = _Param(StringOut);
     ErrorCluster *errPtr = _ParamPointer(ErrClust);
     if (!errPtr || !errPtr->status)
-        Format(&format, count, arguments, buffer, errPtr);
+        Format(true, &format, count, arguments, buffer, errPtr);
     return _NextInstruction();
 }
 
