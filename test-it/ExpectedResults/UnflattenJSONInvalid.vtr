@@ -1,6 +1,6 @@
 All tests pass
-(false false false false false false false false false false false false false false true false false true true true false true false false true false false false false true true false false false false true true)
-(-375005 -375005 -375005 -375005 -375005 -375005 -375005 -375005 -375005 0 0 0 -375005 0 0 -375008 0 0 0 -375005 -375005 0 -375005 0 -375005 -375005 -375005 -375005 0 -375005 -375005 -375005 0 0 0 -375005 0)
+(false false false false false false false false false true false true false false true false false true true true false true false false true false false false true true true false false false false true true)
+(-375005 -375005 -375005 -375005 -375005 -375005 -375005 -375005 -375005 -375003 0 -375003 -375005 0 0 -375008 0 0 0 -375005 -375005 0 -375005 0 -375005 -375005 -375005 -375005 -375003 -375005 -375005 -375005 0 0 0 -375005 0)
 Check_Pass_1 false Correct:-375003 Output:-375005
 Check_Pass_2 false Correct:-375003 Output:-375005
 Check_Pass_3 false Correct:-375003 Output:-375005
@@ -10,9 +10,9 @@ Check_Pass_6 false Correct:-375003 Output:-375005
 Check_Pass_7 false Correct:-375003 Output:-375005
 Check_Pass_8 false Correct:-375003 Output:-375005
 Check_Pass_9 false Correct:-375003 Output:-375005
-Check_Pass_10 false Correct:-375003 Output:0
+Check_Pass_10 true Correct:-375003 Output:-375003
 Check_Pass_11 false Correct:-375003 Output:0
-Check_Pass_12 false Correct:-375003 Output:0
+Check_Pass_12 true Correct:-375003 Output:-375003
 Check_Pass_13 false Correct:-375003 Output:-375005
 Check_Pass_14 false Correct:-375003 Output:0
 Check_Pass_15 true Correct:0 Output:0
@@ -29,7 +29,7 @@ Check_Pass_25 true Correct:-375005 Output:-375005
 Check_Pass_26 false Correct:-375003 Output:-375005
 Check_Pass_27 false Correct:-375003 Output:-375005
 Check_Pass_28 false Correct:-375003 Output:-375005
-Check_Pass_29 false Correct:-375003 Output:0
+Check_Pass_29 true Correct:-375003 Output:-375003
 Check_Pass_30 true Correct:-375005 Output:-375005
 Check_Pass_31 true Correct:-375005 Output:-375005
 Check_Pass_32 false Correct:-375003 Output:-375005

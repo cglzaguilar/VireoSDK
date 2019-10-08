@@ -996,7 +996,8 @@ Int32 TDViaParser::ParseArrayData(TypedArrayCoreRef pArray, void* pFirstEltInSli
             AQBlock1* pEltData = (AQBlock1*) pFirstEltInSlice;
             Int32 errCode = kLVError_NoError;
 
-            while ((_string.Length() > 0) && !_string.EatChar(Fmt()._arrayPost)) {
+            Boolean bArrayEndDelimiterFound = _string.EatChar(Fmt()._arrayPost);
+            while ((_string.Length() > 0) && !bArrayEndDelimiterFound) {
                 // Only read as many elements as there was room allocated for,
                 // ignore extra ones.
                 _string.EatLeadingSpaces();
@@ -1025,8 +1026,13 @@ Int32 TDViaParser::ParseArrayData(TypedArrayCoreRef pArray, void* pFirstEltInSli
                     pEltData += step;
                 }
                 elementCount++;
+                bArrayEndDelimiterFound = _string.EatChar(Fmt()._arrayPost);
             }
 
+            if (errCode == kLVError_NoError && !bArrayEndDelimiterFound) {
+                LOG_EVENT(kHardDataError, "')' missing");
+                return Fmt().UseFieldNames() ? Int32(kLVError_JSONInvalidString) : Int32(kLVError_ArgError);
+            }
             if (bExtraInitializersFound) {
                 LOG_EVENT(kWarning, "Ignoring extra array initializer elements");
             }
