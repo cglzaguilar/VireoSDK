@@ -1040,6 +1040,9 @@ Int32 TDViaParser::ParseArrayData(TypedArrayCoreRef pArray, void* pFirstEltInSli
         } else if (tt == TokenTraits_SymbolName && token.CompareCStr("null")) {
             LOG_EVENT(kSoftDataError, "null encountered");
             return Fmt().UseFieldNames() ? _options._allowNulls ? Int32(kLVError_NoError) : Int32(kLVError_JSONTypeMismatch) : Int32(kLVError_ArgError);
+        } else if (tt == TokenTraits_Unrecognized) {
+            LOG_EVENT(kHardDataError, "Unrecognized token");
+            return Fmt().UseFieldNames() ? Int32(kLVError_JSONInvalidString) : Int32(kLVError_ArgError);
         } else {
             LOG_EVENT(kHardDataError, "'(' missing");
             return Fmt().UseFieldNames() ? Int32(kLVError_JSONTypeMismatch) : Int32(kLVError_ArgError);

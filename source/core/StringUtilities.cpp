@@ -525,6 +525,9 @@ TokenTraits SubString::ReadToken(SubString* token, Boolean suppressInfNaN /*=fal
                 break;
             }
         }
+        if (c != '"') {
+            tokenTraits = TokenTraits_Unrecognized;
+        }
     } else if (('\'' == c) || (('@' == c) && (cPeek == '\''))) {
         Boolean allowEscapes = true;
         //   'abc' or @'abc'
@@ -543,6 +546,9 @@ TokenTraits SubString::ReadToken(SubString* token, Boolean suppressInfNaN /*=fal
             } else if (c == '\'') {
                 break;
             }
+        }
+        if (c != '\'') {
+            tokenTraits = TokenTraits_Unrecognized;
         }
     } else if ('*' == c) {
         tokenTraits = TokenTraits_WildCard;
