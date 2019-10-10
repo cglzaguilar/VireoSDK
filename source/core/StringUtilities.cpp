@@ -521,6 +521,8 @@ TokenTraits SubString::ReadToken(SubString* token, Boolean suppressInfNaN /*=fal
             if (c == '\\' && allowEscapes) {
                 SubString escapToken;
                 ReadEscapeToken(&escapToken);
+/*            } else if (c >= 0x0 && c <= 0x1F && tokenTraits == TokenTraits_String) {
+                break;  // Control characters are not allowed.*/
             } else if (c == '"') {
                 break;
             }
@@ -543,6 +545,8 @@ TokenTraits SubString::ReadToken(SubString* token, Boolean suppressInfNaN /*=fal
             if (c == '\\' && allowEscapes) {
                 SubString escapToken;
                 ReadEscapeToken(&escapToken);
+/*            } else if (c >= 0x0 && c <= 0x1F && tokenTraits == TokenTraits_String) {
+                break;  // Control characters are not allowed.*/
             } else if (c == '\'') {
                 break;
             }
