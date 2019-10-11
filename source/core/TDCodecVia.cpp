@@ -1043,9 +1043,15 @@ Int32 TDViaParser::ParseArrayData(TypedArrayCoreRef pArray, void* pFirstEltInSli
         } else if (tt == TokenTraits_Unrecognized) {
             LOG_EVENT(kHardDataError, "Unrecognized token");
             return Fmt().UseFieldNames() ? Int32(kLVError_JSONInvalidString) : Int32(kLVError_ArgError);
+        } else if ((tt == TokenTraits_Boolean) || (tt == TokenTraits_Integer) || (tt == TokenTraits_IEEE754)) {
+             LOG_EVENT(kHardDataError, "Unrecognized token");
+             return Fmt().UseFieldNames() ? Int32(kLVError_JSONTypeMismatch) : Int32(kLVError_ArgError);
+/*        } else if (tt == TokenTraits_Punctuation && token.CompareCStr("{")) { // This change is very specific and more like a hack.
+             LOG_EVENT(kHardDataError, "Unrecognized token");
+             return Fmt().UseFieldNames() ? Int32(kLVError_JSONTypeMismatch) : Int32(kLVError_ArgError);*/
         } else {
             LOG_EVENT(kHardDataError, "'(' missing");
-            return Fmt().UseFieldNames() ? Int32(kLVError_JSONTypeMismatch) : Int32(kLVError_ArgError);
+            return Fmt().UseFieldNames() ? Int32(kLVError_JSONInvalidString) : Int32(kLVError_ArgError);
         }
     } else if (rank == 0) {
         // For Zero-D arrays there are no parens, just parse the element
