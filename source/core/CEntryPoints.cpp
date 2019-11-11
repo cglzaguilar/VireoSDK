@@ -18,6 +18,7 @@ SDG
 #include "TDCodecVia.h"
 #include "CEntryPoints.h"
 #include "JavaScriptRef.h"
+#include "TypeAndDataManager.h"
 
 #if defined (VIREO_C_ENTRY_POINTS)
 namespace Vireo {
@@ -458,6 +459,65 @@ VIREO_EXPORT TypeRef TypeManager_FindType(TypeManagerRef typeManager, const char
 {
     SubString temp(typeName);
     return typeManager->FindType(&temp);
+}
+//------------------------------------------------------------
+VIREO_EXPORT EggShellResult TypeManager_GetVIs(TypeManagerRef tm, void** viTypePtrs, void** viDataPtrs)
+{
+    TypeManagerScope scope(tm);
+    if (viTypePtrs == nullptr)
+        return kEggShellResult_InvalidTypeRef;
+
+    if (viDataPtrs == nullptr)
+        return kEggShellResult_InvalidResultPointer;
+
+    static SubString viTypeName("VirtualInstrument");
+    // Count number of VIs
+    IntIndex viCount = 0;
+    TypeRef type = tm->TypeList();
+    while (type != nullptr) {
+        if (type->IsA(&viTypeName)) {
+            viCount++;
+        }
+        type = type->Next();
+    }
+
+    // Create vi type and data arrays
+    TypeRef typeType = tm->FindType(tsTypeType);
+    TypedArrayCoreRef typeArray = TypedArrayCore::New(typeType);
+    typeArray->SetElementType(typeType, false);
+    typeArray->Resize1D(viCount);
+    TypeRef viType = tm->FindType(VI_TypeName);
+    TypedArrayCoreRef viDataArray = TypedArrayCore::New(viType);
+    viDataArray->SetElementType(viType, false);
+    viDataArray->Resize1D(viCount);
+
+    // Return vi types and data pointers
+    viCount = 0;
+    type = tm->TypeList();
+    while (type != nullptr) {
+        if (type->IsA(&viTypeName)) {
+            TypedArrayCoreRef *pObj = (TypedArrayCoreRef*)type->Begin(kPARead);
+            VirtualInstrument *viPtr = (VirtualInstrument*)(*pObj)->RawObj();
+            void** typeDataPtr = (void**)typeArray->BeginAt(viCount);
+            *typeDataPtr = (void*)type;
+            void** viDataPtr = (void**)viDataArray->BeginAt(viCount);
+            *viDataPtr = (void*)viPtr;
+            viCount++;
+        }
+        type = type->Next();
+    }
+
+    *viTypePtrs = (void*)typeArray;
+    *viDataPtrs = (void*)viDataArray;
+
+    /*for (int i = 0; i <= viDataArray->Length(); i++) {
+        VirtualInstrument **viPtr = (VirtualInstrument **)viDataArray->BeginAt(i);
+        SubString viName = (*viPtr)->VIName();
+        gPlatform.IO.Print(viName.Length(), (const char*)viName.Begin());
+        gPlatform.IO.Print("\n");
+    }*/
+
+    return kEggShellResult_Success;
 }
 //------------------------------------------------------------
 VIREO_EXPORT Int32 TypeRef_TopAQSize(TypeRef typeRef)

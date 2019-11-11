@@ -67,6 +67,7 @@ VIREO_EXPORT Int32 Data_GetArrayLength(const void* pData);
 //! Typeref functions
 VIREO_EXPORT TypeRef TypeManager_Define(TypeManagerRef typeManager, const char* typeName, const char* typeString);
 VIREO_EXPORT TypeRef TypeManager_FindType(TypeManagerRef typeManager, const char* typeName);
+VIREO_EXPORT EggShellResult TypeManager_GetVIs(TypeManagerRef tm, void** viTypePtrs, void** viDataPtrs);
 VIREO_EXPORT Int32 TypeRef_TopAQSize(TypeRef typeRef);
 VIREO_EXPORT Boolean TypeRef_IsFlat(TypeRef typeRef);
 VIREO_EXPORT Boolean TypeRef_IsValid(TypeRef typeRef);
